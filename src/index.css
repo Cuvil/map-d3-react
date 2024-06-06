@@ -1,0 +1,13 @@
+/* Asegúrate de que html, body, y #root ocupen todo el espacio disponible */
+html, body, #root {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+/* También puedes establecer el estilo del componente principal aquí si lo necesitas */
+.App {
+  width: 100%;
+  height: 100%;
+}
