@@ -1,9 +1,9 @@
 /* Asegúrate de que html, body, y #root ocupen todo el espacio disponible */
-html, body, #root {
-  width: 100%;
+html, body {
   height: 100%;
   margin: 0;
   padding: 0;
+  overflow: hidden; /* Evita el desplazamiento */
 }
 
 /* También puedes establecer el estilo del componente principal aquí si lo necesitas */

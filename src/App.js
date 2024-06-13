@@ -1,17 +1,24 @@
-import React from 'react';
-import MapComponent from './components/mapa/MapComponent'; 
+import React, { useState } from 'react';
+import './App.css';
+import Sidebar from './components/menu/Sidebar';
+import MapComponent from './components/mapa/MapComponent';
 
 function App() {
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+
+  const toggleSidebar = () => {
+    setIsSidebarOpen(!isSidebarOpen);
+  };
+
+
   return (
     <div className="App">
-      <header className="App-header">
-        <h1>Mapa con D3.js y Leaflet en React</h1>
-      </header>
-      <main>
-        <MapComponent />
-      </main>
+      <MapComponent/>
+      <Sidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
     </div>
   );
 }
+
 
 export default App;

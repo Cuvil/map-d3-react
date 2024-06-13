@@ -1,19 +1,17 @@
 import React, { useEffect } from 'react';
 import L from 'leaflet';
-import * as d3 from 'd3';
 import 'leaflet/dist/leaflet.css';
-import './MapComponent.css'
+import './MapComponent.css';
+import '../../context/DataContext';
 
-const MapComponent = () => {
+const MapComponent = ({ mostrarMarcadores, estaciones }) => {
   useEffect(() => {
     // Verificar si el contenedor del mapa ya está inicializado
     const container = L.DomUtil.get('map-container');
     if (container._leaflet_id != null) {
       container._leaflet_id = null; // Resetear el contenedor del mapa
     }
-
-    
-
+  
     // Coordenadas y nivel de zoom iniciales
     const initialCoordinates = [-5.149, -74.136]; // Coordenadas [latitud, longitud]
     const initialZoomLevel = 7.4;
@@ -21,58 +19,79 @@ const MapComponent = () => {
     // Crear el mapa usando Leaflet y establecer la vista inicial
     const map = L.map('map-container').setView(initialCoordinates, initialZoomLevel);
 
-    // Agregar una capa de mapa base
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    // Agregar una capa de mapa base satelital
+    const satelliteMapLayer = L.tileLayer('https://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}',{
+      maxZoom: 20,
+      subdomains:['mt0','mt1','mt2','mt3']
     }).addTo(map);
 
-    // Crear datos de ejemplo para el mapa
-    const data = [
-      { name: 'A', value: 10, coords: [51.505, -0.09] },
-      { name: 'B', value: 20, coords: [48.8566, 2.3522] },
-      { name: 'C', value: 30, coords: [40.7128, -74.0060] }
-    ];
+    // Agregar una capa de mapa de calles
+    const streetMapLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    });
 
-    // Crear un contenedor SVG sobre el mapa de Leaflet
-    const svg = d3.select(map.getPanes().overlayPane).append('svg');
-    const g = svg.append('g').attr('class', 'leaflet-zoom-hide');
+    // Agregar una capa de nubes en tiempo real
+    const cloudsLayer = L.tileLayer('https://tile.openweathermap.org/map/clouds_new/{z}/{x}/{y}.png?appid=fc3460a17b9746792bd0408d435de0bd', {
+      attribution: 'Map data &copy; <a href="https://openweathermap.org">OpenWeatherMap</a>'
+    });
 
-    // Función para proyectar los puntos de datos al sistema de coordenadas del mapa
-    function projectPoint(lat, lng) {
-      const point = map.latLngToLayerPoint(new L.LatLng(lat, lng));
-      return [point.x, point.y];
-    }
+    // Mover los controles de zoom a la parte superior derecha
+    map.zoomControl.setPosition('topright');
 
-    // Crear una escala lineal para asignar valores a tamaños de círculo
-    const scale = d3.scaleLinear()
-                    .domain([0, d3.max(data, d => d.value)])
-                    .range([5, 50]); // Tamaño mínimo y máximo del círculo
+    // Agregar un control de capas para cambiar entre el mapa satelital, el mapa de calles y la capa de nubes
+    const baseMaps = {
+      "Mapa Satelital": satelliteMapLayer,
+      "Mapa de Calles": streetMapLayer,
+    };
+    const overlayMaps = {
+      "Nubes en Tiempo Real": cloudsLayer
+    };
+    L.control.layers(baseMaps, overlayMaps).addTo(map);
 
-    // Agregar círculos al contenedor del mapa
-    const circles = g.selectAll('circle')
-                      .data(data)
-                      .enter()
-                      .append('circle')
-                      .attr('cx', d => projectPoint(d.coords[0], d.coords[1])[0])
-                      .attr('cy', d => projectPoint(d.coords[0], d.coords[1])[1])
-                      .attr('r', d => scale(d.value))
-                      .attr('fill', 'steelblue')
-                      .attr('opacity', 0.6);
+    // Función para limpiar todos los marcadores del mapa
+    const limpiarMarcadores = () => {
+      map.eachLayer(layer => {
+        if (layer instanceof L.Marker) {
+          map.removeLayer(layer);
+        }
+      });
+    };
 
-    // Función para actualizar la posición de los círculos al cambiar el zoom o mover el mapa
-    function update() {
-      circles.attr('cx', d => projectPoint(d.coords[0], d.coords[1])[0])
-             .attr('cy', d => projectPoint(d.coords[0], d.coords[1])[1]);
-    }
+    // Función para crear los marcadores en el mapa
+    const crearMarcadores = () => {
+      limpiarMarcadores(); // Limpiar marcadores existentes
 
-    map.on('zoomend', update);
-    map.on('moveend', update);
-    update(); // Llamar a update una vez para posicionar los círculos inicialmente
+      if (mostrarMarcadores && estaciones) {
+        estaciones.forEach(estacion => {
+          const marker = L.marker([estacion.EstLatitud, estacion.EstLongitud], {
+            icon: L.icon({
+              iconUrl: `img/Marker/${estacion.EstColor.toLowerCase()}.png`, // Ruta al icono de marcador basado en el color de la estación
+              iconSize: [40, 40],
+              iconAnchor: [20, 40],
+            }),
+          }).addTo(map);
 
-  }, []); // Ejecutar solo una vez al cargar el componente
+          marker.bindTooltip(estacion.EstNombre, {
+            permanent: false,
+            direction: 'top',
+            opacity: 0.7,
+          });
+
+          marker.on('click', () => {
+            // Acción al hacer clic en el marcador (puedes personalizar esta acción según tus necesidades)
+            console.log(`Clic en marcador de ${estacion.EstNombre}`);
+          });
+        });
+      }
+    };
+
+    // Llamar a la función para crear marcadores al inicio y cuando cambien las dependencias
+    crearMarcadores();
+
+  }, [mostrarMarcadores, estaciones]); // Ejecutar cada vez que mostrarMarcadores o estaciones cambia
 
   return (
-    <div id="map-container" style={{ width: '100%', height: '100vh' }}>
+    <div id="map-container" style={{ width: '97%', height: '110vh' }}>
       {/* Contenedor para el mapa */}
     </div>
   );
