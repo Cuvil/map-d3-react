@@ -1,24 +1,33 @@
 import React, { useState } from 'react';
-import './App.css';
 import Sidebar from './components/menu/Sidebar';
 import MapComponent from './components/mapa/MapComponent';
+import { estacionesConvencionales } from './components/menu/hidrologia/estConvencionales'; // Asegúrate de tener los datos correctos
 
-function App() {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-
+const App = () => {
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [mostrarMarcadores, setMostrarMarcadores] = useState(false);
 
   const toggleSidebar = () => {
-    setIsSidebarOpen(!isSidebarOpen);
+    setSidebarOpen(!sidebarOpen);
   };
 
+  const handleEstConvencionalesClick = (isOpen) => {
+    setMostrarMarcadores(isOpen);
+  };
 
   return (
-    <div className="App">
-      <MapComponent/>
-      <Sidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
+    <div>
+      <Sidebar
+        isOpen={sidebarOpen}
+        toggleSidebar={toggleSidebar}
+        onEstConvencionalesClick={handleEstConvencionalesClick}
+      />
+      <MapComponent
+        mostrarMarcadores={mostrarMarcadores}
+        estaciones={estacionesConvencionales}
+      />
     </div>
   );
-}
-
+};
 
 export default App;
