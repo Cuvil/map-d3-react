@@ -1,14 +1,7 @@
 import React from 'react';
-import ReactDOM from 'react-dom';
-import './index.css'; // Importa el archivo CSS principal
+import { createRoot } from 'react-dom/client';
 import App from './App';
-import { DataProvider } from './context/DataContext';
 
-ReactDOM.render(
-  <React.StrictMode>
-    <DataProvider>
-      <App />
-    </DataProvider>
-  </React.StrictMode>,
-  document.getElementById('root')
-);
+const container = document.getElementById('root');
+const root = createRoot(container);
+root.render(<App />);

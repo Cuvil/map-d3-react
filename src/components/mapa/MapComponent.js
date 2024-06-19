@@ -1,4 +1,3 @@
-// src/components/mapa/MapComponent.js
 import React, { useEffect, useState } from 'react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -12,7 +11,7 @@ const MapComponent = ({ mostrarMarcadores, estaciones }) => {
 
   useEffect(() => {
     const container = L.DomUtil.get('map-container');
-    if (container._leaflet_id != null) {
+    if (container && container._leaflet_id != null) {
       container._leaflet_id = null;
     }
 
@@ -73,7 +72,7 @@ const MapComponent = ({ mostrarMarcadores, estaciones }) => {
           });
 
           marker.on('click', () => {
-            setWeatherData(estacion.weatherData); // Asegúrate de que cada estación tenga weatherData
+            setWeatherData(estacion.weatherData);
             setModalIsOpen(true);
           });
         });

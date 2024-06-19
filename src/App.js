@@ -1,7 +1,10 @@
 import React, { useState } from 'react';
 import Sidebar from './components/menu/Sidebar';
 import MapComponent from './components/mapa/MapComponent';
-import { estacionesConvencionales } from './components/menu/hidrologia/estConvencionales'; // Asegúrate de tener los datos correctos
+import { estacionesConvencionales } from './components/menu/hidrologia/estConvencionales';
+import Modal from 'react-modal';
+
+Modal.setAppElement('#root');
 
 const App = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
